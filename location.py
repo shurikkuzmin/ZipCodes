@@ -1,9 +1,10 @@
 import geopy
-import numpy
-import pandas
+import numpy as np
+import pandas as pd
 from geopy.extra.rate_limiter import RateLimiter
 import json
 import folium
+from folium.plugins import HeatMap
 
 def GetCoors():
 
@@ -56,8 +57,39 @@ def VisualizeData(data):
     folium.Marker([mainLatitude, mainLongitude],popup="Main Center", icon=folium.Icon(color="red")).add_to(locs)
   
     locs.save("map.html")
+
+def VisualizeHeatMap(data):
+    allCount = 0
+    mainLongitude = 0.0
+    mainLatitude = 0.0
+    sumOrders = data["Count"].sum()
+    mainLatitude = (data["Latitude"] * data["Count"]).sum() / sumOrders
+    mainLongitude = (data["Longitude"] * data["Count"]).sum() / sumOrders
+
+    #for zipCode in data:
+    #    dataHeatMap.append([data[zipCode]["Latitude"], data[zipCode]["Longitude"], data[zipCode]["Count"]])
+    #    count = data[zipCode]["Count"]
+    #    allCount = allCount + count
+    #    mainLongitude = mainLongitude + data[zipCode]["Longitude"] * count
+    #    mainLatitude = mainLatitude + data[zipCode]["Latitude"] * count
+
+    #mainLongitude = mainLongitude / allCount
+    #mainLatitude = mainLatitude / allCount
+    
+    locs = folium.Map(location=[mainLatitude, mainLongitude])
+
+    locsHeat = HeatMap(data=data.values, overlay=False).add_to(locs)
+  
+    locs.save("heatMap.html")
+
+def LoadXLS():
+    df = pd.read_excel("26Apr2020.xlsx", header=None, names=["Latitude", "Longitude", "Count"])
+    
 if __name__=="__main__":
     #data = GetCoors()
-    data = LoadCoors()
-    VisualizeData(data)
+    #data = LoadCoors()
+    data = LoadXLS()
+    quit()
+    #VisualizeData(data)
+    VisualizeHeatMap(data)
     print(data)
